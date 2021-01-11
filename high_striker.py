@@ -2,17 +2,17 @@ from psychopy import visual, core, event
 import random
 
 class HighStriker(object):
-    def __init__(self, win, top_coords: tuple, bottom_coords: tuple, target_radius=10, slider_radius=20):
+    def __init__(self, win, top_coords: tuple, bottom_coords: tuple, target_radius=20, slider_radius=10):
         self.window = win
         self.top_coords = top_coords
         self.bottom_coords = bottom_coords
-        self.line = visual.Line( win=win, start=top_coords, end=bottom_coords )
+        self.line = visual.ShapeStim( win=win, lineColor='black', vertices=(bottom_coords, top_coords), units='pix')
         self.target = visual.Circle(
             win=win,
             units="pix",
             radius=target_radius,
-            fillColor=[1, 0, 0],
-            lineColor=[1, 0, 0]
+            # fillColor=[1, 0, 0],
+            lineColor='red'
             )
         self.target.pos = top_coords
 
@@ -20,15 +20,43 @@ class HighStriker(object):
             win=win,
             units="pix",
             radius=slider_radius,
-            # fillColor=[1, 1, 1],
+            fillColor=[1, 1, 1],
             lineColor=[1, 1, 1]
             )
         self.slider.pos = bottom_coords
 
-    def draw(self):
-        self.line.draw()
-        self.target.draw()
-        self.slider.draw()
+
+        self.slider_travel_time = .7
+        self.timestep = 1/60
+
+    def draw(self, no_target=False):
+        if no_target:
+            self.line.draw()
+            self.slider.draw()
+        else:
+            self.line.draw()
+            self.target.draw()
+            self.slider.draw()
+            
 
     def randomize_target(self):
-        self.target.pos = (0, random.randrange(self.bottom_coords[1], self.top_coords[1]) )
+        lower_bound = int(self.bottom_coords[1] + (self.top_coords[1] - self.bottom_coords[1])/3)
+        self.target.pos = (0, random.randrange(lower_bound, self.top_coords[1]) )
+        # self.target.pos = (0, lower_bound)
+
+
+    def slide_up(self, to_slide: int, auto_draw=[]):
+        initial_pos = self.slider.pos[1]
+        clock = core.Clock()
+        while clock.getTime() < self.slider_travel_time:
+            core.wait(self.timestep)
+            for e in auto_draw:
+                e.draw()
+            progress = (clock.getTime()/self.slider_travel_time)*to_slide
+            self.slider.pos = (0, initial_pos + progress)
+            self.draw()
+            self.window.flip()
+
+    def reset_slider(self):
+        self.slider.pos = self.bottom_coords
+            
