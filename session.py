@@ -7,14 +7,15 @@ import math
 
 
 class Session(object):
-    def __init__(self, win, striker: HighStriker, light: TrafficLight, sensor_input_stream=None):
+    def __init__(self, win, striker: HighStriker, light: TrafficLight, sensor_inlet=None):
         self.window = win
         self.striker = striker
         self.light = light
+        self.stream_inlet = sensor_inlet
         # self.input_stream = sensor_input_stream
         # self.mouse = sensor_input_stream # not supposed to be mouse but instead an input stream from sensor
 
-        self.speed_thresh = 10 # a hundred what? [NOTE]: need to check this
+        self.speed_thresh = 10 # 10 what? [NOTE]: need to check this
     
     def run_trial(self):
         self.light.is_green = False
@@ -51,7 +52,7 @@ class Session(object):
     def get_dist(self, dt=.020):
         mouse = event.Mouse(win=self.window)
         clock = core.Clock()
-        speedometer = Speedometer(mouse, clock)
+        speedometer = Speedometer(clock, stream_inlet)
         interval = []
         speed = 0
         while speed < self.speed_thresh:
@@ -59,7 +60,7 @@ class Session(object):
             print(speed)
         # reset clock and speedometer
         clock = core.Clock()
-        speedometer = Speedometer(mouse, clock)
+        speedometer = Speedometer(clock, stream_inlet)
         speed = math.inf
         while speed > self.speed_thresh:
             speed = speedometer.get_speed(dt)
@@ -71,7 +72,7 @@ class Session(object):
 
     def run(self):
         clock = core.Clock()
-        while clock.getTime() < 60:
+        while clock.getTime() < 15*60:
             self.run_trial()
 
 
