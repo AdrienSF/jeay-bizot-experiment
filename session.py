@@ -3,20 +3,37 @@ from traffic_light import TrafficLight
 from speedometer import Speedometer
 from psychopy import visual, core, event
 import math
+import csv
 
 
 
 class Session(object):
-    def __init__(self, win, striker: HighStriker, light: TrafficLight, sensor_input_stream=None):
+    def __init__(self, win, striker: HighStriker, light: TrafficLight, sensor_input_stream=None, session_id=None):
         self.window = win
         self.striker = striker
         self.light = light
+        self.session_id = session_id
+        self.block_duration = 5*60
         # self.input_stream = sensor_input_stream
         # self.mouse = sensor_input_stream # not supposed to be mouse but instead an input stream from sensor
 
         self.speed_thresh = 10 # a hundred what? [NOTE]: need to check this
+
+        self.clock = None
+        self.history = {}
+        self.current_trial = 0
+
+        self.instructions = {True: 'Launch the slider to wherever you want, and whenever, but try to space out the launches in time.',
+                            False: 'Launch the slider as precisely as possible into the randomly appearing red target. You have a limited number of tries so make every shot count.'
+                            }
+        self.start_message = '\npress any key to start'
+
     
-    def run_trial(self):
+    def run_trial(self, is_type_A: bool):
+        self.current_trial += 1
+        self.history[self.current_trial] = {}
+
+
         self.light.is_green = False
         self.light.draw()
         self.striker.draw(no_target=True)
@@ -26,22 +43,26 @@ class Session(object):
         core.wait(1)
 
         self.light.is_green = True
-        self.striker.randomize_target()
+        y_pos = self.striker.randomize_target()
+        self.history[self.current_trial]['target_y_pos'] = y_pos
+
         self.light.draw()
-        self.striker.draw()
+        self.striker.draw(no_target=is_type_A)
         self.window.flip()
+        # record time when light turned on
+        self.history[self.current_trial]['ON_disp_time'] = self.clock.getTime()
 
         # start listening to self.input_stream
         # do recording stuff
         dist = self.get_dist()
-        print('dist: ' + str(dist))
+        # print('dist: ' + str(dist))
         # stop listening
         self.light.is_green = False
         self.light.draw()
-        self.striker.draw()
+        self.striker.draw(no_target=is_type_A)
         self.window.flip()
 
-        self.striker.slide_up(dist, auto_draw=[self.light])
+        self.striker.slide_up(dist, auto_draw=[self.light], no_target=is_type_A)
 
         core.wait(1)
         self.striker.reset_slider()
@@ -56,22 +77,57 @@ class Session(object):
         speed = 0
         while speed < self.speed_thresh:
             speed = speedometer.get_speed(dt)
-            print(speed)
+            # print(speed)
+        # record start of movement
+        self.history[self.current_trial]['movement_onset'] = self.clock.getTime()
+        
         # reset clock and speedometer
         clock = core.Clock()
         speedometer = Speedometer(mouse, clock)
         speed = math.inf
         while speed > self.speed_thresh:
             speed = speedometer.get_speed(dt)
-        
+        # record end of movement        
+        self.history[self.current_trial]['movement_end'] = self.clock.getTime()
 
-        # print(speedometer.history)
-        return speedometer.get_mean_speed() * 10
+        speed = speedometer.get_mean_speed()
+        self.history[self.current_trial]['speed'] = speed
+        return speed * 20
 
+    def run_block(self, is_type_A):
+        self.display_instructions(is_type_A)
+        block_start = self.clock.getTime()
+        while self.clock.getTime() < self.block_duration + block_start:
+            self.run_trial(is_type_A)
 
     def run(self):
-        clock = core.Clock()
-        while clock.getTime() < 60:
-            self.run_trial()
+        self.clock = core.Clock()
+        # insert pulse to EEG
+        for trial_type in [True, False]:
+            self.run_block(trial_type)
 
+
+    def save_to_csv(self):
+        top = ['session ID: ' + str(self.session_id)]
+        header = list(['trial_num'] + list(list(self.history.values())[0].keys()))
+
+        contents = [ [trial_num] + list(self.history[trial_num].values()) for trial_num in self.history ]
+
+        with open(str(self.session_id) + '.csv', 'w', newline='') as csvfile:
+            csvwriter = csv.writer(csvfile, delimiter=',',
+                                    quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            
+            csvwriter.writerow(top)
+            csvwriter.writerow(header)
+            csvwriter.writerows(contents)
+
+
+
+    def display_instructions(self, is_type_A):
+        message = visual.TextStim(self.window, text=self.instructions[is_type_A]+self.start_message, units='pix', height=50)
+        message.draw()
+        self.window.flip()
+        
+        while not event.getKeys():
+            core.wait(.1)
 

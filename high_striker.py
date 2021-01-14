@@ -41,11 +41,12 @@ class HighStriker(object):
 
     def randomize_target(self):
         lower_bound = int(self.bottom_coords[1] + (self.top_coords[1] - self.bottom_coords[1])/3)
-        self.target.pos = (0, random.randrange(lower_bound, self.top_coords[1]) )
-        # self.target.pos = (0, lower_bound)
+        y_pos = random.randrange(lower_bound, self.top_coords[1])
+        self.target.pos = (0, y_pos )
+        return y_pos
 
 
-    def slide_up(self, to_slide: int, auto_draw=[]):
+    def slide_up(self, to_slide: int, auto_draw=[], no_target=False):
         initial_pos = self.slider.pos[1]
         clock = core.Clock()
         while clock.getTime() < self.slider_travel_time:
@@ -54,7 +55,7 @@ class HighStriker(object):
                 e.draw()
             progress = (clock.getTime()/self.slider_travel_time)*to_slide
             self.slider.pos = (0, initial_pos + progress)
-            self.draw()
+            self.draw(no_target=no_target)
             self.window.flip()
 
     def reset_slider(self):

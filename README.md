@@ -1,8 +1,15 @@
 # Experiment spec:
 ## Experiment structure:
-Run trials until 15 min have passed.
+Run 2 blocks of 5 minutes. 
 
-## Trial spec:
+For the first block the subject is instructed to launch the slider wherever and whenever, as many times as wanted during the 5 minutes (as long as the on signal is displayed). First block runs 5 minutes of A trials.
+
+For the second block the subject is instructed to aim for the target. Second block runs 5 minutes of B trials
+
+## A Trial spec:
+Same as B but never display the "target" circle.
+
+## B Trial spec:
 Input elements:
 
 sensor measuring the y (vertical) position of the subject’s finger
