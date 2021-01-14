@@ -82,7 +82,7 @@ class Session(object):
         # interval = []
         acc = 0
         while acc < self.acc_thresh:
-            acc, timestamp = self.stream_inlet.pull_sample()
+            acc = self.get_acc()
             # print(speed)
         # record start of movement
         self.history[self.current_block][self.current_trial]['movement_onset'] = self.clock.getTime()
@@ -93,7 +93,7 @@ class Session(object):
         acc = math.inf
         acc_hist = []
         while acc > self.acc_thresh:
-            acc, timestamp = self.stream_inlet.pull_sample()
+            acc = self.get_acc()
             acc_hist.append(acc)
         # record end of movement        
         self.history[self.current_block][self.current_trial]['movement_end'] = self.clock.getTime()
@@ -147,3 +147,8 @@ class Session(object):
         while not event.getKeys():
             core.wait(.1)
 
+
+    def get_acc(self):
+        sample, timestamp = self.stream_inlet.pull_sample()
+
+        return sample[11]
