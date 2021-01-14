@@ -114,7 +114,7 @@ class Session(object):
             self.run_trial(is_type_A)
 
     def run(self):
-        port = parallel.ParallelPort(address='0x0378')
+        port = parallel.ParallelPort(address='0xDFF8')
         self.clock = core.Clock()
         # insert pulse to EEG
         port.setData(1)
