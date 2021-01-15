@@ -9,7 +9,7 @@ import statistics as stat
 
 
 class Session(object):
-    def __init__(self, win, striker: HighStriker, light: TrafficLight, sensor_input_stream=None, session_id=None):
+    def __init__(self, win, striker: HighStriker, light: TrafficLight, sensor_input_stream=None, session_id=None, acc_thresh = None, max_acc = None):
         self.window = win
         self.striker = striker
         self.light = light
@@ -23,7 +23,9 @@ class Session(object):
         # self.input_stream = sensor_input_stream
         # self.mouse = sensor_input_stream # not supposed to be mouse but instead an input stream from sensor
 
-        self.acc_thresh = 10 # a hundred what? [NOTE]: need to check this
+        self.acc_thresh = acc_thresh # a hundred what? [NOTE]: need to check this
+        self.max_acc = max_acc
+        
 
         self.clock = None
         self.post_pulse_time = None
@@ -75,7 +77,7 @@ class Session(object):
         self.window.flip()
         
 
-    def get_dist(self, dt=.020):
+    def get_dist(self):
         # mouse = event.Mouse(win=self.window)
         # clock = core.Clock()
         # speedometer = Speedometer(mouse, clock)
@@ -101,7 +103,9 @@ class Session(object):
         mean_acc = stat.mean(acc_hist)
         self.history[self.current_block][self.current_trial]['acceleration'] = mean_acc
 
-        return mean_acc/1000000
+        bottm  = self.striker.bottom_coords
+        top  = self.striker.top_coords
+        return (mean_acc / max_acc) * (top[1] - bottm[1])
 
     def run_block(self, is_type_A):
         self.current_block += 1
