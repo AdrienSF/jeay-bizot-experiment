@@ -5,9 +5,9 @@ from session import Session
 from pylsl import StreamInlet, resolve_stream
 
 print("looking for stream...")
-streams = resolve_stream('source_id', 'myuid323457') 
+streams = resolve_stream('source_id', '17010768') 
 
-inlet = StreamInlet(streams[0])
+inlet = StreamInlet(streams[1])
 print('found')
 
 

@@ -1,4 +1,4 @@
-# Experiment spec:
+# WHEN Experiment spec:
 ## Experiment structure:
 Run 2 blocks of 5 minutes. 
 
@@ -61,3 +61,64 @@ Distance D:
 Travelled distance D should be set to:<br>
 D = S\*max(S)/max(D)<br>
 where max(S) is calibrated on a participant by participant basis at the start of each session and represents the maximal speed participants can achieve when instructed to maximize their finger’s speed (for now we can set this value to an arbitrary value of c) . And max(D) is equal to the bar length.
+
+
+# WHAT Experiment spec:
+## Experiment structure:
+Run 3 blocks of 10 trials each. 
+
+For the first block the subject is instructed at the start of each trial to press a left or right button once the clock's hand reaches a randomly positioned target.
+
+For the second block the subject is instructed to decide before the start of each trial to press the left or right button once the clock's hand reaches a randomly positioned target.
+
+For the third block the subject is instructed to spontaneously press the left or right button once the clock's hand reaches a randomly positioned target. The participants are specifically instructed to NOT make their decisions until the very last moment. 
+
+## A Trial spec:
+Input elements:
+- input from two keyboard keys (one on the left-side of the keyboard: Q and one on the right-side of the keyboard: P)
+- input from spacebar
+
+Graphical elements:
+- Grey background
+- Libet type clock (a white circle along which a clock hand rotates)
+- Clock hand ( a white dot, 10 pix, that rotates around the Libet type clock in a 5s period)
+- A "target" ( a red circle, 20 pix, that appears randomly positioned along the Libet type clock circle and stays fixated for the whole trial)
+	- the "target" must appear randomly within a 1.5s to 2.5s range after the start of the trial (uniformly distributed)
+	- the "target" must appear in the half circle that precedes the clock hand at the time of appearance
+
+Instructions: "When the clock's hand reaches the target (red circle) press the $ button" (where $ is randomly picked amongst {Left, Right}). When you are ready to start, press the spacebar"
+
+## B Trial spec:
+
+Same as Trial A except for instructions
+
+Instructions: "Decide for button between Left and Right now and press it when the clock's hand reaches the target (red circle). When you are ready to start, press the spacebar" 
+
+## C Trial spec:
+
+Same as Trial A except for instructions
+
+Instructions: "Withold any decision about Left or Right button press and make this decision as spontaneously as possible once the clock's hand reaches the target (red circle). When you are ready to start, press the spacebar"
+
+## Timing and location:
+- display clock circle throughout trial, clock diameter should be about a third of the screen's height.
+
+
+before the start of trial:
+- display condition instruction until 'spacebar is pressed'
+ 
+start of trial:
+- display clock with the clock hand (random initial position) - the clock hand should be rotating straight away (at the pace of 1 full rotation per 5 seconds)
+
+end of trial:
+- once a button has been pressed stop the clock hand at its current position wait 1s and move on to the next trial
+
+## Data collection:
+
+Record for each trial:
+- trial type
+- block number
+- target position
+- position at time of button press
+- time of button press with respect to trial start (target appearance)
+- button pressed (left - right)

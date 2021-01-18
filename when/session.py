@@ -20,10 +20,9 @@ class Session(object):
         self.current_block = 0
         self.current_trial = 0
         # self.total_blocks = 2
-        # self.input_stream = sensor_input_stream
         # self.mouse = sensor_input_stream # not supposed to be mouse but instead an input stream from sensor
 
-        self.acc_thresh = 10 # a hundred what? [NOTE]: need to check this
+        self.acc_thresh = 2250000 # a hundred what? [NOTE]: need to check this
 
         self.clock = None
         self.post_pulse_time = None
@@ -101,7 +100,7 @@ class Session(object):
         mean_acc = stat.mean(acc_hist)
         self.history[self.current_block][self.current_trial]['acceleration'] = mean_acc
 
-        return mean_acc/1000000
+        return mean_acc/10000
 
     def run_block(self, is_type_A):
         self.current_block += 1
@@ -114,10 +113,10 @@ class Session(object):
             self.run_trial(is_type_A)
 
     def run(self):
-        port = parallel.ParallelPort(address='0xDFF8')
+        # port = parallel.ParallelPort(address='0xDFF8')
         self.clock = core.Clock()
         # insert pulse to EEG
-        port.setData(1)
+        # port.setData(1)
         self.post_pulse_time = self.clock.getTime()
         for trial_type in [True, False]:
             self.run_block(trial_type)
@@ -151,4 +150,4 @@ class Session(object):
     def get_acc(self):
         sample, timestamp = self.stream_inlet.pull_sample()
 
-        return sample[11]
+        return sample[64]
