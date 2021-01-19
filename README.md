@@ -21,7 +21,7 @@ Graphical elements:
 - a “slider” circle: white, 10px radius, filled
 - a “target” circle: red, 20px radius, not filled but thick enough line to be clearly visible
 
-## Timing and location:
+### Timing and position:
 - display bar throughout trial, leave some top and bottom margin (gap between bar and top/bottom of screen)
 
 
@@ -51,7 +51,7 @@ stop monitoring motion sensor
 wait 1s
 end trial
 
-## Logic and data collection:
+### Logic and data collection:
 Threshold T:
 
 T should not pick up minor movements. Rather it should be such that only full finger movements (fingertip is displaced intentionally) are recorded. For instance, twitches etc. should all remain below T.
@@ -82,25 +82,25 @@ Graphical elements:
 - Grey background
 - Libet type clock (a white circle along which a clock hand rotates)
 - Clock hand ( a white dot, 10 pix, that rotates around the Libet type clock in a 5s period)
-- A "target" ( a red circle, 20 pix, that appears randomly positioned along the Libet type clock circle and stays fixated for the whole trial)
+- A "target" ( a red circle, 20 pix, that appears randomly positioned along the Libet type clock circle and stays fixed for the whole trial)
 	- the "target" must appear randomly within a 1.5s to 2.5s range after the start of the trial (uniformly distributed)
 	- the "target" must appear in the half circle that precedes the clock hand at the time of appearance
 
 Instructions: "When the clock's hand reaches the target (red circle) press the $ button" (where $ is randomly picked amongst {Left, Right}). When you are ready to start, press the spacebar"
 
-## B Trial spec:
+### B Trial spec:
 
 Same as Trial A except for instructions
 
 Instructions: "Decide for button between Left and Right now and press it when the clock's hand reaches the target (red circle). When you are ready to start, press the spacebar" 
 
-## C Trial spec:
+### C Trial spec:
 
 Same as Trial A except for instructions
 
 Instructions: "Withold any decision about Left or Right button press and make this decision as spontaneously as possible once the clock's hand reaches the target (red circle). When you are ready to start, press the spacebar"
 
-## Timing and location:
+### Timing and position:
 - display clock circle throughout trial, clock diameter should be about a third of the screen's height.
 
 
@@ -113,7 +113,7 @@ start of trial:
 end of trial:
 - once a button has been pressed stop the clock hand at its current position wait 1s and move on to the next trial
 
-## Data collection:
+### Data collection:
 
 Record for each trial:
 - trial type
