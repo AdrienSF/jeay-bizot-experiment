@@ -6,8 +6,6 @@ For the first block the subject is instructed to launch the slider wherever and 
 
 For the second block the subject is instructed to aim for the target. Second block runs 5 minutes of B trials
 
-## A Trial spec:
-Same as B but never display the "target" circle.
 
 ## B Trial spec:
 Input elements:
@@ -61,6 +59,9 @@ Distance D:
 Travelled distance D should be set to:<br>
 D = S\*max(S)/max(D)<br>
 where max(S) is calibrated on a participant by participant basis at the start of each session and represents the maximal speed participants can achieve when instructed to maximize their finger’s speed (for now we can set this value to an arbitrary value of c) . And max(D) is equal to the bar length.
+
+## A Trial spec:
+Same as B but never display the "target" circle.
 
 
 # WHAT Experiment spec:
