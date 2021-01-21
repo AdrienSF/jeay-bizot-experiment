@@ -9,7 +9,7 @@ import statistics as stat
 
 
 class Session(object):
-    def __init__(self, win, striker: HighStriker, light: TrafficLight, sensor_input_stream=None, session_id=None):
+    def __init__(self, win, striker: HighStriker, light: TrafficLight, sensor_input_stream=None, session_id=None, acc_thresh = None, max_acc = None):
         self.window = win
         self.striker = striker
         self.light = light
@@ -22,7 +22,8 @@ class Session(object):
         # self.total_blocks = 2
         # self.mouse = sensor_input_stream # not supposed to be mouse but instead an input stream from sensor
 
-        self.acc_thresh = 2250000 # a hundred what? [NOTE]: need to check this
+        self.acc_thresh = acc_thresh 
+        self.max_acc = max_acc
 
         self.clock = None
         self.post_pulse_time = None
@@ -100,7 +101,7 @@ class Session(object):
         mean_acc = stat.mean(acc_hist)
         self.history[self.current_block][self.current_trial]['acceleration'] = mean_acc
 
-        return mean_acc/10000
+        return abs(((mean_acc - self.acc_thresh) / (self.max_acc - self.acc_thresh)) * (self.striker.top_coords[1] - self.striker.bottom_coords[1]))
 
     def run_block(self, is_type_A):
         self.current_block += 1
@@ -150,4 +151,4 @@ class Session(object):
     def get_acc(self):
         sample, timestamp = self.stream_inlet.pull_sample()
 
-        return sample[64]
+        return sample[11]
