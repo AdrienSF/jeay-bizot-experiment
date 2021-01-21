@@ -7,9 +7,9 @@ from calibrate import Calibrator
 
 
 print("looking for stream...")
-streams = resolve_stream('source_id', 'myuid323457') # for ActiChamp - 17010768
+streams = resolve_stream('source_id', '17010768') # for ActiChamp - 17010768 ||||| portable: myuid323457
 
-inlet = StreamInlet(streams[0], max_buflen=1) # for ActiChamp (I think streams[1])
+inlet = StreamInlet(streams[1], max_buflen=1) # for ActiChamp (I think streams[1]) |||| streams[0] for portable
 print('found')
 
 

@@ -20,18 +20,20 @@ class Calibrator(object):
         self.window.flip()
         data_OFF = []
         clock = core.Clock()
-        while clock.getTime() < 10:
+        # sample[11] for portable, sample[64] for actichamp
+        while clock.getTime() < 15:
             sample, timestamp = self.stream_inlet.pull_sample()
-            data_OFF.append(sample[11])
+            # print(sample[64])
+            data_OFF.append(sample[64])
         
         self.light.is_green = True
         self.light.draw()
         self.window.flip()
         data_ON = []
         clock = core.Clock()
-        while clock.getTime() < 10:
+        while clock.getTime() < 15:
             sample, timestamp = self.stream_inlet.pull_sample()
-            data_ON.append(sample[11])
+            data_ON.append(sample[64])
 
         with open('accalibrate.json', 'w') as f:
             f.write(json.dumps(data_OFF + data_ON))

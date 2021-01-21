@@ -16,7 +16,7 @@ class Session(object):
         self.session_id = session_id
         self.stream_inlet = sensor_input_stream
 
-        self.block_duration = 30
+        self.block_duration = 5 * 60
         self.current_block = 0
         self.current_trial = 0
         # self.total_blocks = 2
@@ -82,10 +82,11 @@ class Session(object):
         # interval = []
         acc = 0
         while acc < self.acc_thresh:
-            acc = self.get_acc()
+            acc, sensor_time = self.get_acc(return_time=True)
             # print(speed)
         # record start of movement
         self.history[self.current_block][self.current_trial]['movement_onset'] = self.clock.getTime()
+        self.history[self.current_block][self.current_trial]['movement_onset_sensor_time'] = sensor_time
         
         # reset clock and speedometer
         # clock = core.Clock()
@@ -119,7 +120,7 @@ class Session(object):
         # insert pulse to EEG
         # port.setData(1)
         self.post_pulse_time = self.clock.getTime()
-        for trial_type in [True, False]:
+        for trial_type in [True, False, True, False]:
             self.run_block(trial_type)
 
 
@@ -148,7 +149,11 @@ class Session(object):
             core.wait(.1)
 
 
-    def get_acc(self):
+    def get_acc(self, return_time=False):
         sample, timestamp = self.stream_inlet.pull_sample()
 
-        return sample[11]
+        # sample[11] for portable, sample[64] for actichamp
+        if return_time:
+            return sample[64], timestamp
+        else:
+            return sample[64]
