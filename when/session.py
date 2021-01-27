@@ -5,6 +5,7 @@ from psychopy import visual, core, event, parallel
 import math
 import csv
 import statistics as stat
+from rate_bar import RateBar
 
 
 
@@ -33,6 +34,9 @@ class Session(object):
                             False: 'Launch the slider as precisely as possible into the randomly appearing red target. You have a limited number of tries so make every shot count.'
                             }
         self.start_message = '\npress any key to start'
+
+
+        self.rate_bar = RateBar(win)
 
     
     def run_trial(self, is_type_A: bool):
@@ -73,6 +77,12 @@ class Session(object):
         core.wait(1)
         self.striker.reset_slider()
         self.window.flip()
+
+
+        user_rating = self.rate_bar.get_user_rating()
+        self.history[self.current_block][self.current_trial]['effort_rating'] = user_rating
+
+
         
 
     def get_dist(self, dt=.020):

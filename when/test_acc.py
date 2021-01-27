@@ -1,27 +1,15 @@
-from pylsl import StreamInlet, resolve_stream
-from psychopy import visual, core, event, parallel
-import statistics as stat
+from psychopy import visual, core, event
+from rate_bar import RateBar
 
+win = visual.Window(monitor='testMonitor', fullscr=True)
 
-print("looking for stream...")
-streams = resolve_stream('source_id', '17010768') 
+rater = RateBar(win)
 
-inlet = StreamInlet(streams[0])
-print('found')
+rater.draw()
+win.flip()
 
-samples = []
-while True:
-    sample, timestamp = inlet.pull_sample()
-    samples.append(sample[65])
+print(rater.get_user_rating())
 
-    print(stat.mean(samples))
+win.close()
+core.quit()
 
-    # clock = core.Clock()
-    # samples = []
-    # while clock.getTime() < .1:
-    #     sample, timestamp = inlet.pull_sample()
-
-    #     samples.append(sample[66]-210)
-
-
-    # print( "".join([ '.' for i in range(int(stat.mean(samples)))]) )
