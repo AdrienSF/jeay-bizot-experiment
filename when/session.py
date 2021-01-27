@@ -37,6 +37,8 @@ class Session(object):
 
 
         self.rate_bar = RateBar(win)
+        self.cross = visual.TextStim(self.window, text='+', units='pix', height=50)
+
 
     
     def run_trial(self, is_type_A: bool):
@@ -47,6 +49,7 @@ class Session(object):
         self.light.is_green = False
         self.light.draw()
         self.striker.draw(no_target=True)
+        self.cross.draw()
 
         self.window.flip()
 
@@ -58,6 +61,7 @@ class Session(object):
 
         self.light.draw()
         self.striker.draw(no_target=is_type_A)
+        self.cross.draw()
         self.window.flip()
         # record time when light turned on
         self.history[self.current_block][self.current_trial]['ON_disp_time'] = self.clock.getTime()
@@ -70,9 +74,10 @@ class Session(object):
         self.light.is_green = False
         self.light.draw()
         self.striker.draw(no_target=is_type_A)
+        self.cross.draw()
         self.window.flip()
 
-        self.striker.slide_up(dist, auto_draw=[self.light], no_target=is_type_A)
+        self.striker.slide_up(dist, auto_draw=[self.light, self.cross], no_target=is_type_A)
 
         core.wait(1)
         self.striker.reset_slider()

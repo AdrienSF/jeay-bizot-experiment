@@ -51,11 +51,11 @@ class HighStriker(object):
         clock = core.Clock()
         while clock.getTime() < self.slider_travel_time:
             core.wait(self.timestep)
-            for e in auto_draw:
-                e.draw()
             progress = (clock.getTime()/self.slider_travel_time)*to_slide
             self.slider.pos = (0, initial_pos + progress)
             self.draw(no_target=no_target)
+            for e in auto_draw:
+                e.draw()
             self.window.flip()
 
     def reset_slider(self):
