@@ -5,8 +5,6 @@ from psychopy import visual, core, event, parallel
 import math
 import csv
 import statistics as stat
-from rate_bar import RateBar
-
 
 
 class Session(object):
@@ -34,14 +32,26 @@ class Session(object):
                             False: 'Launch the slider as precisely as possible into the randomly appearing red target. You have a limited number of tries so make every shot count.'
                             }
         self.start_message = '\npress any key to start'
+        # set which trial type for each block. 
+        self.block_order = ['A', 'B', 'C']
 
 
-        self.rate_bar = RateBar(win)
         self.cross = visual.TextStim(self.window, text='+', units='pix', height=50)
-
-
+        self.rate_scale = visual.RatingScale(
+            win, 
+            showValue=False, 
+            labels=0, 
+            precision=100, 
+            low=0, 
+            high=100, 
+            tickHeight=0.0,
+            size=2,
+            scale='Effortless                        Effortful'
+        )
     
-    def run_trial(self, is_type_A: bool):
+    def run_trial(self, trial_type: str):
+        is_type_A = trial_type == 'A'
+
         self.current_trial += 1
         self.history[self.current_block][self.current_trial] = {}
 
@@ -56,8 +66,13 @@ class Session(object):
         core.wait(1)
 
         self.light.is_green = True
-        y_pos = self.striker.randomize_target()
-        self.history[self.current_block][self.current_trial]['target_y_pos'] = y_pos
+        if trial_type == 'C':
+            # always place target in center for C trials
+            self.striker.target.pos = (0, 0)
+            self.history[self.current_block][self.current_trial]['target_y_pos'] = self.striker.target.pos
+        else:
+            y_pos = self.striker.randomize_target()
+            self.history[self.current_block][self.current_trial]['target_y_pos'] = y_pos
 
         self.light.draw()
         self.striker.draw(no_target=is_type_A)
@@ -79,13 +94,23 @@ class Session(object):
 
         self.striker.slide_up(dist, auto_draw=[self.light, self.cross], no_target=is_type_A)
 
+        if trial_type == 'C':
+            while ratingScale.noResponse:
+                self.light.draw()
+                self.striker.draw(no_target=is_type_A)
+                self.cross.draw()
+                ratingScale.draw()
+                win.flip()
+            rating = ratingScale.getRating()
+            self.history[self.current_block][self.current_trial]['rating'] = rating
+        else:
+            self.history[self.current_block][self.current_trial]['rating'] = None
+
         core.wait(1)
         self.striker.reset_slider()
         self.window.flip()
 
 
-        user_rating = self.rate_bar.get_user_rating()
-        self.history[self.current_block][self.current_trial]['effort_rating'] = user_rating
 
 
         
@@ -119,7 +144,7 @@ class Session(object):
 
         return abs(((mean_acc - self.acc_thresh) / (self.max_acc - self.acc_thresh)) * (self.striker.top_coords[1] - self.striker.bottom_coords[1]))
 
-    def run_block(self, is_type_A):
+    def run_block(self, trial_type: str):
         self.current_block += 1
         self.current_trial = 0
         self.history[self.current_block] = {}
@@ -127,15 +152,16 @@ class Session(object):
         self.display_instructions(is_type_A)
         block_start = self.clock.getTime()
         while self.clock.getTime() < self.block_duration + block_start:
-            self.run_trial(is_type_A)
+            self.run_trial(trial_type)
 
+    # [NOTE]: add correct port address or the damn thing will never send triggers
     def run(self):
         # port = parallel.ParallelPort(address='0xDFF8')
         self.clock = core.Clock()
         # insert pulse to EEG
         # port.setData(1)
         self.post_pulse_time = self.clock.getTime()
-        for trial_type in [True, False, True, False]:
+        for trial_type in self.block_order:
             self.run_block(trial_type)
 
 
