@@ -37,7 +37,7 @@ class Session(object):
 
 
         self.cross = visual.TextStim(self.window, text='+', units='pix', height=50)
-        self.rate_scale = visual.RatingScale(
+        self.rate_scale = visual.self.rate_scale(
             win, 
             showValue=False, 
             labels=0, 
@@ -95,13 +95,14 @@ class Session(object):
         self.striker.slide_up(dist, auto_draw=[self.light, self.cross], no_target=is_type_A)
 
         if trial_type == 'C':
-            while ratingScale.noResponse:
+            while self.rate_scale.noResponse:
                 self.light.draw()
                 self.striker.draw(no_target=is_type_A)
                 self.cross.draw()
-                ratingScale.draw()
+                self.rate_scale.draw()
                 win.flip()
-            rating = ratingScale.getRating()
+            rating = self.rate_scale.getRating()
+            self.rate_scale.noResponse = True
             self.history[self.current_block][self.current_trial]['rating'] = rating
         else:
             self.history[self.current_block][self.current_trial]['rating'] = None
@@ -145,6 +146,7 @@ class Session(object):
         return abs(((mean_acc - self.acc_thresh) / (self.max_acc - self.acc_thresh)) * (self.striker.top_coords[1] - self.striker.bottom_coords[1]))
 
     def run_block(self, trial_type: str):
+        is_type_A = trial_type == 'A'
         self.current_block += 1
         self.current_trial = 0
         self.history[self.current_block] = {}
@@ -156,10 +158,10 @@ class Session(object):
 
     # [NOTE]: add correct port address or the damn thing will never send triggers
     def run(self):
-        # port = parallel.ParallelPort(address='0xDFF8')
+        port = parallel.ParallelPort(address='0xDFF8')
         self.clock = core.Clock()
         # insert pulse to EEG
-        # port.setData(1)
+        port.setData(1)
         self.post_pulse_time = self.clock.getTime()
         for trial_type in self.block_order:
             self.run_block(trial_type)
