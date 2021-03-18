@@ -1,15 +1,16 @@
-from psychopy import visual, core, event
+from psychopy import visual, core, event, parallel
 from high_striker import HighStriker
 from traffic_light import TrafficLight
 from session import Session
 from pylsl import StreamInlet, resolve_stream
 from calibrate import Calibrator
 
+port = parallel.ParallelPort(address=0xDFF8) 
 
 print("looking for stream...")
 streams = resolve_stream('source_id', '17010768') # for ActiChamp - 17010768 ||||| portable: myuid323457
 
-inlet = StreamInlet(streams[1], max_buflen=1) # for ActiChamp (I think streams[1]) |||| streams[0] for portable
+inlet = StreamInlet(streams[0], max_buflen=1) # for ActiChamp (I think streams[1]) |||| streams[0] for portable
 print('found')
 
 

@@ -21,7 +21,7 @@ class Calibrator(object):
         data_OFF = []
         clock = core.Clock()
         # sample[11] for portable, sample[64] for actichamp
-        while clock.getTime() < 15:
+        while clock.getTime() < 10:
             sample, timestamp = self.stream_inlet.pull_sample()
             # print(sample[64])
             data_OFF.append(sample[64])
@@ -31,7 +31,7 @@ class Calibrator(object):
         self.window.flip()
         data_ON = []
         clock = core.Clock()
-        while clock.getTime() < 15:
+        while clock.getTime() < 10:
             sample, timestamp = self.stream_inlet.pull_sample()
             data_ON.append(sample[64])
 

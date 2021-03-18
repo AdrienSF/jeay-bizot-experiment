@@ -6,6 +6,8 @@ import math
 import csv
 import statistics as stat
 
+port = parallel.ParallelPort(address=0xDFF8) 
+
 
 class Session(object):
     def __init__(self, win, striker: HighStriker, light: TrafficLight, sensor_input_stream=None, session_id=None, acc_thresh = None, max_acc = None):
@@ -15,7 +17,7 @@ class Session(object):
         self.session_id = session_id
         self.stream_inlet = sensor_input_stream
 
-        self.block_duration = 5 * 60
+        self.block_duration = 60*7
         self.current_block = 0
         self.current_trial = 0
         # self.total_blocks = 2
@@ -33,11 +35,11 @@ class Session(object):
                             }
         self.start_message = '\npress any key to start'
         # set which trial type for each block. 
-        self.block_order = ['A', 'B', 'C']
+        self.block_order = ['A', 'B','A', 'B']
 
 
         self.cross = visual.TextStim(self.window, text='+', units='pix', height=50)
-        self.rate_scale = visual.self.rate_scale(
+        self.rate_scale = visual.RatingScale(
             win, 
             showValue=False, 
             labels=0, 
@@ -50,6 +52,8 @@ class Session(object):
         )
     
     def run_trial(self, trial_type: str):
+        
+        port.setData(5)
         is_type_A = trial_type == 'A'
 
         self.current_trial += 1
@@ -100,7 +104,7 @@ class Session(object):
                 self.striker.draw(no_target=is_type_A)
                 self.cross.draw()
                 self.rate_scale.draw()
-                win.flip()
+                self.window.flip()
             rating = self.rate_scale.getRating()
             self.rate_scale.noResponse = True
             self.history[self.current_block][self.current_trial]['rating'] = rating
@@ -128,6 +132,7 @@ class Session(object):
         # record start of movement
         self.history[self.current_block][self.current_trial]['movement_onset'] = self.clock.getTime()
         self.history[self.current_block][self.current_trial]['movement_onset_sensor_time'] = sensor_time
+        port.setData(6)
         
         # reset clock and speedometer
         # clock = core.Clock()
@@ -147,6 +152,7 @@ class Session(object):
 
     def run_block(self, trial_type: str):
         is_type_A = trial_type == 'A'
+
         self.current_block += 1
         self.current_trial = 0
         self.history[self.current_block] = {}
@@ -158,7 +164,6 @@ class Session(object):
 
     # [NOTE]: add correct port address or the damn thing will never send triggers
     def run(self):
-        port = parallel.ParallelPort(address='0xDFF8')
         self.clock = core.Clock()
         # insert pulse to EEG
         port.setData(1)
