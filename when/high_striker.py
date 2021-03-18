@@ -55,7 +55,8 @@ class HighStriker(object):
             self.slider.pos = (0, initial_pos + progress)
             self.draw(no_target=no_target)
             for e in auto_draw:
-                e.draw()
+                if e:
+                    e.draw()
             self.window.flip()
 
     def reset_slider(self):

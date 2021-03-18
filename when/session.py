@@ -50,6 +50,11 @@ class Session(object):
             size=2,
             scale='Effortless                        Effortful'
         )
+
+        # score and counters
+        self.total_score = visual.TextStim(self.window, text='0', pos=(-0.9,.9))
+        self.trial_score = visual.TextStim(self.window, text='0', pos=(-0.8,.9))
+        self.strike_counter = visual.TextStim(self.window, text='40', pos=(-0.9,.9))
     
     def run_trial(self, trial_type: str):
         
@@ -64,6 +69,13 @@ class Session(object):
         self.light.draw()
         self.striker.draw(no_target=True)
         self.cross.draw()
+        if is_type_A:
+            self.strike_counter.draw()
+            score_message = self.strike_counter
+        else:
+            self.total_score.draw()
+            score_message = self.total_score
+            
 
         self.window.flip()
 
@@ -96,7 +108,7 @@ class Session(object):
         self.cross.draw()
         self.window.flip()
 
-        self.striker.slide_up(dist, auto_draw=[self.light, self.cross], no_target=is_type_A)
+        self.striker.slide_up(dist, auto_draw=[self.light, self.cross, score_message], no_target=is_type_A)
 
         if trial_type == 'C':
             while self.rate_scale.noResponse:
@@ -110,6 +122,22 @@ class Session(object):
             self.history[self.current_block][self.current_trial]['rating'] = rating
         else:
             self.history[self.current_block][self.current_trial]['rating'] = None
+
+        # display trial score
+        if not is_type_A:
+            # set trial score
+            score = self.get_trial_score(dist)
+            self.trial_score.text = str(score)
+            # draw
+            self.light.draw()
+            self.striker.draw()
+            self.cross.draw()
+            self.total_score.draw()
+            # add trial score to total
+            self.total_score.text = str(int(self.total_score.text)+score)
+        else: # decrement strike counter
+            self.strike_counter.text = str(int(self.strike_counter.text)-1)
+
 
         core.wait(1)
         self.striker.reset_slider()
@@ -151,6 +179,11 @@ class Session(object):
         return abs(((mean_acc - self.acc_thresh) / (self.max_acc - self.acc_thresh)) * (self.striker.top_coords[1] - self.striker.bottom_coords[1]))
 
     def run_block(self, trial_type: str):
+        # reset strike counter to 40
+        self.strike_counter.text = '40'
+        # reset total score?
+
+
         is_type_A = trial_type == 'A'
 
         self.current_block += 1

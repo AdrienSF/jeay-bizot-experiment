@@ -19,8 +19,8 @@ Graphical elements:
 - alternating green “ON” word/ red “OFF” word: fits on right half of screen
 - a “slider” circle: white, 10px radius, filled
 - a “target” circle: red, 20px radius, not filled but thick enough line to be clearly visible
-- a “permanent score” text: white, top-right of screen
-- a “score” text: white, center (after each trial)
+- a “total score” text: white, top-right of screen
+- a “trial score” text: white, center (after each trial)
 
 ### Timing and position:
 - display bar throughout trial, leave some top and bottom margin (gap between bar and top/bottom of screen)
