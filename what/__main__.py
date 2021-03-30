@@ -7,10 +7,10 @@ windowRect = win.size
 
 session = WhatSession(win, sess_id)
 
-
-session.run()
-# session.run_trial(1,1)
-
+try:
+    session.run()
+except KeyboardInterrupt:
+    session.abort()
 
 
 win.close()

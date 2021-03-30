@@ -70,6 +70,12 @@ class Session(object):
         except (TypeError, OverflowError):
             return False
 
+    def abort(self):
+        self.aborted = True
+        self.close()
+        # close psychopy window
+        self.window.close()
+        raise KeyboardInterrupt('Session aborted')
 
 
 
@@ -87,20 +93,20 @@ class Session(object):
 class WhatSession(Session):
     def __init__(self, win, sess_id):
         trial_types = ['A', 'B', 'C']
-        trials_per_block = 1
+        trials_per_block = 10
         experiment_execution = [ [{'trial_type': trial_type} for i in range(trials_per_block)] for trial_type in trial_types ]
 
         super().__init__(win, sess_id, experiment_execution)
 
         self.clock_stim = ClockStim(self.window)
 
-        self.failure_message = visual.TextStim(win, 'damn, to slow you loser', units='pix', height=40)
+        self.failure_message = visual.TextStim(win, 'Too slow!', units='pix', height=40)
 
         self.start_string = '\n\nWhen you are ready to start, press any key.'
         self.intermission_strings = {
             'A': 'When the clock\'s hand reaches the target (red circle) press ',
-            'B': 'Decide for button between Left and Right now and press it when the clock\'s hand reaches the target (red circle).',
-            'C': 'Withold any decision about Left or Right button press and make this decision as spontaneously as possible once the clock\'s hand reaches the target (red circle).'
+            'B': 'In this block, please decide between left (q button) and right (p button) button press before the trial starts. Once your decision is made press any key for the trial to start. When the clock\'s hand reaches the target (red circle) press the button that you had decided for beforehand.',
+            'C': 'In this block, please withold any decision about Left (q) or Right (p) button press and make this decision as spontaneously as possible once the clock\'s hand reaches the target (red circle).'
             }
 
 
@@ -117,7 +123,7 @@ class WhatSession(Session):
         while clock.getTime() < random.uniform(1.5, 2.5):
             self.cross.draw()
             self.clock_stim.draw(draw_target=False)
-            self.clock_stim.rotate()
+            self.clock_stim.rotate(self.frame_period) # make sure the timestep for rotating the clock dot is the refresh rate
             self.window.flip()
 
         self.clock_stim.randomize_target()
@@ -129,7 +135,7 @@ class WhatSession(Session):
         while not ('q' in key_pressed or 'p' in key_pressed):
             self.cross.draw()
             self.clock_stim.draw()
-            self.clock_stim.rotate(self.frame_period/2) # make sure the timestep for rotating the clock dot is less than the refresh rate
+            self.clock_stim.rotate(self.frame_period) # make sure the timestep for rotating the clock dot is the refresh rate
             self.window.flip()
 
             key_pressed = event.getKeys()
@@ -150,6 +156,8 @@ class WhatSession(Session):
         # send trigger for button press
         # self.port.setData(2)
         core.wait(2)
+        event.clearEvents()
+
 
 
     def run_intermission(self, block_num: int, trial_num=None):
@@ -167,7 +175,7 @@ class WhatSession(Session):
                 print('trialNotFoundException')
                 raise Exception()
 
-            message = visual.TextStim(self.window, to_display, units='pix', height=40)
+            message = visual.TextStim(self.window, to_display, units='pix', height=40, wrapWidth=750)
             message.draw()
             self.window.flip()
             while not event.getKeys():
@@ -178,7 +186,7 @@ class WhatSession(Session):
     def save_to_csv(self):
         top_info = ['id: ' + str(self.id), 'frame_period: ' + str(self.frame_period)]
         header = ['block_num', 'trial_num'] + list( self.execution[0][0].keys() )
-        contents = [ [block_num, trial_num] + list(self.execution[block_num][trial_num].values()) for block_num in range(len(self.execution)) for trial_num in range(len(self.execution[block_num])) ]
+        contents = [ [block_num+1, trial_num+1] + list(self.execution[block_num][trial_num].values()) for block_num in range(len(self.execution)) for trial_num in range(len(self.execution[block_num])) ]
         # 'trial_type', 'target_pos', 'final_dot_pos', 'button_press_time', 'button_pressed']
 
 
