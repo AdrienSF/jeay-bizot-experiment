@@ -13,7 +13,7 @@ class ClockStim(object):
             units="pix",
             radius=frame_radius,
             # fillColor=[1, 0, 0],
-            # lineColor='red'
+            lineColor='white',
             edges=128
             )
 
@@ -29,9 +29,10 @@ class ClockStim(object):
         self.target = visual.Circle(
             win=win,
             units="pix",
-            radius=11,
+            radius=15, #was 11
             # fillColor=[1, 1, 1],
-            lineColor='red'
+            lineColor='red',
+            lineWidth=6
             )
         self.target.pos = (0, -frame_radius)
 
