@@ -95,7 +95,7 @@ class Session(object):
 class WhatSession(Session):
     def __init__(self, win, sess_id):
         trial_types = ['A', 'B', 'C']
-        trials_per_block = 10
+        trials_per_block = 1
         experiment_execution = [ [{'trial_type': trial_type} for i in range(trials_per_block)] for trial_type in trial_types ]
 
         super().__init__(win, sess_id, experiment_execution)
