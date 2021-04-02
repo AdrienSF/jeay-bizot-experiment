@@ -5,6 +5,8 @@ import json
 import csv
 import pandas as pd
 
+port = parallel.ParallelPort(address=0xDFF8) 
+
 class Session(object):
     def __init__(self, win, sess_id, experiment_execution):
         self.window = win
@@ -117,6 +119,7 @@ class WhatSession(Session):
     def run_trial(self, block_num: int, trial_num: int):
         # send trigger for start of trial
         # self.port.setData(1)
+        port.setData(5)
         clock = core.Clock()
 
         self.clock_stim.randomize_dot()
@@ -127,6 +130,7 @@ class WhatSession(Session):
             self.window.flip()
 
         self.clock_stim.randomize_target()
+        port.setData(6)
         self.execution[block_num][trial_num]['target_pos'] = str(self.clock_stim.target.pos)
         key_pressed = [None]
         collision_time = None
@@ -155,6 +159,7 @@ class WhatSession(Session):
         self.execution[block_num][trial_num]['button_pressed'] = str(key_pressed)
         # send trigger for button press
         # self.port.setData(2)
+        port.setData(7)
         core.wait(2)
         event.clearEvents()
 
