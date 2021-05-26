@@ -4,7 +4,7 @@ import numpy as np
 import random
 
 class ClockStim(object):
-    def __init__(self, win, frame_radius=200, period=5):
+    def __init__(self, win, frame_radius=200, period=2):
         self.period = period
         self.window = win
 
@@ -37,23 +37,29 @@ class ClockStim(object):
         self.target.pos = (0, -frame_radius)
 
     
+    # def randomize_dot(self):
+    #     # get random angle (between 0 and 2pi)
+    #     rand_angle = random.uniform(0, 2*math.pi)
+    # def randomize_target(self):
+    #     rand_angle = random.uniform(0, math.pi)
+
+    #     rotation_matrix = np.array([
+    #         [math.cos(rand_angle), math.sin(rand_angle)],
+    #         [-math.sin(rand_angle), math.cos(rand_angle)]
+    #     ])
+
+    #     shifted_pos = np.dot(np.array(self.dot.pos), rotation_matrix)
+
+    #     self.target.pos = tuple(shifted_pos)
+        # self.dot.pos = ( self.frame.radius * math.cos(rand_angle), self.frame.radius * math.sin(rand_angle))
+
     def randomize_dot(self):
-        # get random angle (between 0 and 2pi)
-        rand_angle = random.uniform(0, 2*math.pi)
-        self.dot.pos = ( self.frame.radius * math.cos(rand_angle), self.frame.radius * math.sin(rand_angle))
+        dot_angle = 1*math.pi
+        self.dot.pos = ( self.frame.radius * math.cos(dot_angle), self.frame.radius * math.sin(dot_angle))
 
     def randomize_target(self):
-        rand_angle = random.uniform(0, math.pi)
-
-        rotation_matrix = np.array([
-            [math.cos(rand_angle), math.sin(rand_angle)],
-            [-math.sin(rand_angle), math.cos(rand_angle)]
-        ])
-
-        shifted_pos = np.dot(np.array(self.dot.pos), rotation_matrix)
-
-        self.target.pos = tuple(shifted_pos)
-
+        target_angle = (1/2)*math.pi
+        self.target.pos = ( self.frame.radius * math.cos(target_angle), self.frame.radius * math.sin(target_angle))
 
 
     def rotate(self, timestep=.01):

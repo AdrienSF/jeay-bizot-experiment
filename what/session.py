@@ -94,8 +94,8 @@ class Session(object):
 
 class WhatSession(Session):
     def __init__(self, win, sess_id):
-        trial_types = ['A', 'B', 'C']
-        trials_per_block = 1
+        trial_types = ['A', 'C','A', 'C','A', 'C','A', 'C','A', 'C','A', 'C','A', 'C','A', 'C','A', 'C','A', 'C']
+        trials_per_block = 20# to 20
         experiment_execution = [ [{'trial_type': trial_type} for i in range(trials_per_block)] for trial_type in trial_types ]
 
         super().__init__(win, sess_id, experiment_execution)
@@ -123,7 +123,7 @@ class WhatSession(Session):
         clock = core.Clock()
 
         self.clock_stim.randomize_dot()
-        while clock.getTime() < random.uniform(1.5, 2.5):
+        while clock.getTime() < random.uniform(0.5, 1):
             self.cross.draw()
             self.clock_stim.draw(draw_target=False)
             self.clock_stim.rotate(self.frame_period) # make sure the timestep for rotating the clock dot is the refresh rate
@@ -143,6 +143,8 @@ class WhatSession(Session):
             self.window.flip()
 
             key_pressed = event.getKeys()
+            if 'escape' in key_pressed:
+                self.core.quit()
             self.execution[block_num][trial_num]['button_press_time'] = clock.getTime()
 
             if collision_time:
