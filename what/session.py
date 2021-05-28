@@ -1,20 +1,21 @@
-from psychopy import visual, core, event, parallel
+from psychopy import visual, core, event   
 from clock_stim import ClockStim
 import random
 import json
 import csv
 import pandas as pd
 
-port = parallel.ParallelPort(address=0xDFF8) 
-
 class Session(object):
-    def __init__(self, win, sess_id, experiment_execution):
+    def __init__(self, win, sess_id, comp_device, experiment_execution):
         self.window = win
         self.id = sess_id
         self.frame_period = win.monitorFramePeriod
-
+        self.port_ysno = (comp_device == 's')
         self.execution = experiment_execution
         self.cross = visual.TextStim(self.window, text='+', units='pix', height=50)
+        if self.port_ysno:
+            from psychopy import parallel
+            self.port = parallel.ParallelPort(address=0xDFF8) 
 
 
     def run(self):
@@ -93,22 +94,22 @@ class Session(object):
 
 
 class WhatSession(Session):
-    def __init__(self, win, sess_id):
-        trial_types = ['A', 'C','A', 'C','A', 'C','A', 'C','A', 'C','A', 'C','A', 'C','A', 'C','A', 'C','A', 'C']
-        trials_per_block = 20# to 20
+    def __init__(self, win, sess_id, comp_device):
+        trial_types = ['C'] #['A', 'C','A', 'C','A', 'C','A', 'C','A', 'C','A', 'C','A', 'C','A', 'C','A', 'C','A', 'C']
+        trials_per_block = 2 #20# to 20
         experiment_execution = [ [{'trial_type': trial_type} for i in range(trials_per_block)] for trial_type in trial_types ]
 
-        super().__init__(win, sess_id, experiment_execution)
+        super().__init__(win, sess_id, comp_device, experiment_execution)
 
         self.clock_stim = ClockStim(self.window)
 
         self.failure_message = visual.TextStim(win, 'Too slow!', units='pix', height=40)
 
-        self.start_string = '\n\nWhen you are ready to start, press any key.'
+        self.start_string = ''
         self.intermission_strings = {
-            'A': 'When the clock\'s hand reaches the target (red circle) press ',
-            'B': 'In this block, please decide between left (q button) and right (p button) button press before the trial starts. Once your decision is made press any key for the trial to start. When the clock\'s hand reaches the target (red circle) press the button that you had decided for beforehand.',
-            'C': 'In this block, please withold any decision about Left (q) or Right (p) button press and make this decision as spontaneously as possible once the clock\'s hand reaches the target (red circle).'
+            'A': 'Instructed: ',
+            'B': 'Choose now',
+            'C': 'Spontaneous'
             }
 
 
@@ -119,7 +120,8 @@ class WhatSession(Session):
     def run_trial(self, block_num: int, trial_num: int):
         # send trigger for start of trial
         # self.port.setData(1)
-        port.setData(5)
+        if self.port_ysno:
+            self.port.setData(5)
         clock = core.Clock()
 
         self.clock_stim.randomize_dot()
@@ -130,7 +132,8 @@ class WhatSession(Session):
             self.window.flip()
 
         self.clock_stim.randomize_target()
-        port.setData(6)
+        if self.port_ysno:
+            self.port.setData(6)
         self.execution[block_num][trial_num]['target_pos'] = str(self.clock_stim.target.pos)
         key_pressed = [None]
         collision_time = None
@@ -155,17 +158,30 @@ class WhatSession(Session):
                     break
             elif clock.getTime() > 2.5 and abs(self.clock_stim.target.pos[0] - self.clock_stim.dot.pos[0]) < 4 and abs(self.clock_stim.target.pos[1] - self.clock_stim.dot.pos[1]) < 4:
                 collision_time = clock.getTime()
-
+        # Run spontaneity scale if type B        
+        if (self.execution[block_num][trial_num]['trial_type'] == 'C'):
+            ratingScale = visual.RatingScale(
+                self.window, high=3, respKeys = ['1','2','3'], showAccept = True, scale = None, labels = ['Not at all', 'A little bit', 'Very'], 
+                acceptPreText = "Select using: 1, 2 and 3 on the keyboard", acceptText = "\n Press ENTER to confirm", acceptSize = 3
+                )
+            item = visual.TextStim(self.window, "How spontaneous was your movement?", units='pix', height=40, wrapWidth=750)
+            while ratingScale.noResponse:
+                item.draw()
+                ratingScale.draw()
+                self.window.flip()
+            rating = ratingScale.getRating()
+            self.execution[block_num][trial_num]['spontaneous_rating'] = str(rating)
         # get time of button press
         self.execution[block_num][trial_num]['final_dot_pos'] = str(self.clock_stim.dot.pos) + log_failure
         self.execution[block_num][trial_num]['button_pressed'] = str(key_pressed)
+        # Get button ordered to be pressed
+        self.execution[block_num][trial_num]['button_instructed'] = str(self.side_num)
         # send trigger for button press
         # self.port.setData(2)
-        port.setData(7)
-        core.wait(2)
+        if self.port_ysno:
+            self.port.setData(7)
+        core.wait(0.5)
         event.clearEvents()
-
-
 
     def run_intermission(self, block_num: int, trial_num=None):
         # print(trial_num)
@@ -173,10 +189,13 @@ class WhatSession(Session):
             trial_type = self.execution[block_num][trial_num]['trial_type']
 
             if trial_type == 'A':
-                to_display = self.intermission_strings['A'] + str(random.choice(['q', 'p'])) + self.start_string
+                self.side_num = random.choice(['q', 'p'])
+                to_display = self.intermission_strings['A'] + str(self.side_num) + self.start_string
             elif trial_type == 'B':
+                self.side_num = float("NaN")
                 to_display = self.intermission_strings['B'] + self.start_string
             elif trial_type == 'C':
+                self.side_num = float("NaN")
                 to_display = self.intermission_strings['C'] + self.start_string
             else:
                 print('trialNotFoundException')
@@ -187,7 +206,6 @@ class WhatSession(Session):
             self.window.flip()
             while not event.getKeys():
                 pass
-
 
 
     def save_to_csv(self):
