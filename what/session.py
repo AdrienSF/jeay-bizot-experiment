@@ -173,6 +173,7 @@ class WhatSession(Session):
             self.execution[block_num][trial_num]['spontaneous_rating'] = str(rating)
         # get time of button press
         self.execution[block_num][trial_num]['final_dot_pos'] = str(self.clock_stim.dot.pos) + log_failure
+        self.execution[block_num][trial_num]['frame_radius'] = str(self.clock_stim.frame.radius)
         self.execution[block_num][trial_num]['button_pressed'] = str(key_pressed)
         # Get button ordered to be pressed
         self.execution[block_num][trial_num]['button_instructed'] = str(self.side_num)
