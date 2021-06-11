@@ -22,10 +22,10 @@ light = TrafficLight(win)
 
 calibrator = Calibrator(win, light, inlet)
 
-acc_thresh, max_acc = calibrator.calibrate()
-
-safe_thresh = .1*(max_acc - acc_thresh) + acc_thresh
-safe_max = max_acc - .2*(max_acc - acc_thresh)
+# acc_thresh, max_acc = calibrator.calibrate()
+safe_thresh, safe_max = calibrator.calibrate()
+# safe_thresh = .1*(max_acc - acc_thresh) + acc_thresh
+# safe_max = max_acc - .2*(max_acc - acc_thresh)
 
 
 striker = HighStriker(win, top_coords=(0, windowRect[1]/2-100), bottom_coords=(0, -1*(windowRect[1]/2-100)))

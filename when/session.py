@@ -5,19 +5,23 @@ from psychopy import visual, core, event, parallel
 import math
 import csv
 import statistics as stat
+import numpy as np
+from calibrate import Calibrator
+#safe_thresh, safe_max = calibrator.calibrate()
 
 port = parallel.ParallelPort(address=0xDFF8) 
 
 
 class Session(object):
     def __init__(self, win, striker: HighStriker, light: TrafficLight, sensor_input_stream=None, session_id=None, acc_thresh = None, max_acc = None):
+        self.calibrator = Calibrator(win, light, sensor_input_stream)
         self.window = win
         self.striker = striker
         self.light = light
         self.session_id = session_id
         self.stream_inlet = sensor_input_stream
 
-        self.block_duration = 60*7
+        self.block_duration = 60*5
         self.current_block = 0
         self.current_trial = 0
         # self.total_blocks = 2
@@ -35,7 +39,7 @@ class Session(object):
                             }
         self.start_message = '\npress any key to start'
         # set which trial type for each block. 
-        self.block_order = ['A', 'B','A', 'B']
+        self.block_order = ['A','D','B','D','A','D','B'] # Add type D --> calibration
 
 
         self.cross = visual.TextStim(self.window, text='+', units='pix', height=50)
@@ -57,6 +61,11 @@ class Session(object):
         self.strike_counter = visual.TextStim(self.window, text='40', pos=(-0.9,.9))
     
     def run_trial(self, trial_type: str):
+        if trial_type == 'D':
+            # calibrate
+            self.acc_thresh, self.max_acc = self.calibrator.calibrate()
+            return
+
         
         port.setData(5)
         is_type_A = trial_type == 'A'
@@ -230,11 +239,18 @@ class Session(object):
             core.wait(.1)
 
 
-    def get_acc(self, return_time=False):
+    def get_acc(self, return_time=False, dimensions = 1):
         sample, timestamp = self.stream_inlet.pull_sample()
 
         # sample[11] for portable, sample[64] for actichamp
-        if return_time:
-            return sample[64], timestamp
-        else:
-            return sample[64]
+        if (dimensions == 1):
+            if return_time:
+                return sample[64], timestamp
+            else:
+                return sample[64]
+        elif (dimensions == 3):
+            if return_time:
+                return np.linalg.norm(sample[64:67]), timestamp
+            else:
+                return np.linalg.norm(sample[64:67])
+    

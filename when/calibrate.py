@@ -38,5 +38,5 @@ class Calibrator(object):
         with open('accalibrate.json', 'w') as f:
             f.write(json.dumps(data_OFF + data_ON))
 
-        return max(data_OFF), max(data_ON) # acc_thr and upper limit for dist calc      
-        
+        #return max(data_OFF), max(data_ON) # acc_thr and upper limit for dist calc      
+        return .1*(max(data_ON) - max(data_OFF)) + max(data_OFF), max(data_ON) - .2*(max(data_ON) - max(data_OFF))
